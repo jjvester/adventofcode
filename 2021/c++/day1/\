@@ -1,0 +1,38 @@
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <fstream>
+#include <vector>
+
+int main() {
+	std::ifstream infile("input");
+	std::string line;
+	std::vector<std::vector<int>> windows;
+
+	bool started = false;
+	int prev = 0;
+	int index = 0;
+	int items[3];
+	int count = 0;
+
+	while (std::getline(infile, line)) {
+	    std::istringstream iss(line);
+	    int depth;
+            iss >> depth;
+	    items[index % 3] = depth;
+	    if (index == 2) {
+		prev = items[0] + items[1] + items[2];
+		started = true;
+	    } else if (index > 2) {
+		    items[0] = items[1];
+		    items[1] = items[2];
+		    items[2] = depth;
+
+		    int total = items[0] + items[1] + items[2];
+		    count += total > prev ? 1 : 0;
+	    }
+	}
+
+	std::cout << "Depth window increases " << count << std::endl;
+	return 0;
+}
