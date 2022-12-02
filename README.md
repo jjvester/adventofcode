@@ -18,4 +18,4 @@ have paid more attention to that sort of thing.
 I stopped solving the puzzles on day 15 part2. I could have continued but needed to put time into other things especially around the Christmas time
 
 ## 2022
-Decided to use both rust and scala 3. Main focus being rust but wanted to use scala as well. (JDK 17 as JDK for scala)
+Decided to use scala 3. (JDK 17 as JDK for scala)
