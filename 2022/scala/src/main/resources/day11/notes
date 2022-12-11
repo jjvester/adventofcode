@@ -1,0 +1,220 @@
+// Attempt at part2
+
+package org.jjvester
+
+import scala.annotation.tailrec
+import scala.collection.mutable
+
+final class Monkey(val id: String, var items: mutable.ListBuffer[String], val op: String => (String, String), var inspections: Int)
+
+final class Day11:
+
+  private def performRelief(worryLevel: Int, reliefLevel: Int): Int = Math.floor(worryLevel / reliefLevel).toInt
+
+  @tailrec
+  private def playMonkey(monkey: Monkey, items: mutable.ListBuffer[String], monkeyMap: Map[String, Monkey]): Unit =
+    if items.nonEmpty then
+      val next = items.head
+
+      val result = monkey.op(next)
+//      val worryLevel = monkey.op(next)
+//      //val bored = performRelief(worryLevel, 3)
+//      val nextMonkey = monkey.target(worryLevel)
+      monkeyMap(result._1).items.addOne(result._2)
+      monkey.inspections += 1
+
+      playMonkey(monkey, items.tail, monkeyMap)
+    else
+      monkey.items.clear()
+
+  @tailrec
+  private def playAllMonkeys(input: List[Monkey], monkeyMap: Map[String, Monkey]): Unit =
+    if input.nonEmpty then
+      val current = input.head
+      playMonkey(current, current.items, monkeyMap)
+      playAllMonkeys(input.tail, monkeyMap)
+
+  @tailrec
+  private def playRounds(input: List[Monkey], rounds: Int, monkeyMap: Map[String, Monkey]): List[Monkey] =
+    if rounds > 19 then return input
+
+    println("Round "+ rounds)
+    input.foreach(monkey => println(monkey.id + " " + monkey.inspections))
+    println("")
+    playAllMonkeys(input, monkeyMap)
+    playRounds(input, rounds + 1, monkeyMap)
+
+  def part1(input: List[Monkey], rounds: Int): List[Monkey] = playRounds(input, rounds, input.map(monkey => (monkey.id, monkey)).toMap)
+
+//  private def isMonkeyId(input: String)= input.startsWith("Monkey")
+//  private def getMonkeyDetails(input: List[String], acc: List[Monkey], curr: Monkey): (List[String], List[Monkey]) =
+//    if input.isEmpty || isMonkeyId(input.head.trim) then (input, curr :: acc)
+//
+//
+//  private def getAllMonkeys(input: List[String], acc: List[Monkey]): List[Monkey] =
+//    if input.isEmpty then acc
+//
+//    val
+//
+//  def part1(input: List[String], rounds: Int): Int =
+//    def round
+//
+//    0
+
+
+// TESTS
+
+package org.jjvester
+
+import org.junit.Assert
+import org.junit.Assert.assertTrue
+
+import scala.collection.mutable
+
+class Day11Test extends munit.FunSuite:
+
+  private final val nineteen = BigInt(19)
+  private final val thirteen = BigInt(13)
+  private final val seventeen = BigInt(17)
+  private final val six = BigInt(6)
+  private final val zero = BigInt(0)
+  private final val twentyThree = BigInt(23)
+  private final val three = BigInt(3)
+  private final val maxLong = BigInt(java.lang.Long.MAX_VALUE)
+
+  private def bigIntMultiply(a: BigInt, b: BigInt) = a * b
+
+    test("Sample_part1") {
+      /*
+      Monkey 0:
+        Starting items: 79, 98
+        Operation: new = old * 19
+        Test: divisible by 23
+          If true: throw to monkey 2
+          If false: throw to monkey 3
+      */
+      val monkey0 = Monkey("0", mutable.ListBuffer("79", "98"), x => {
+        try
+          val result = java.lang.Math.multiplyExact(java.lang.Long.valueOf(x), 19L)
+          if result % 23 == 0 then ("2", String.valueOf(result)) else ("3", String.valueOf(result))
+        catch
+          case _: ArithmeticException =>
+            val result = bigIntMultiply(BigInt(x), nineteen)
+            if result.mod(twentyThree).compareTo(zero) != 0 then ("2", result.toString()) else ("3", result.toString())
+          case _: NumberFormatException =>
+            val result = bigIntMultiply(BigInt(x), nineteen)
+            if result.mod(twentyThree).compareTo(zero) != 0 then ("2", result.toString()) else ("3", result.toString())
+      }, 0)
+
+      /*
+      Monkey 1:
+        Starting items: 54, 65, 75, 74
+        Operation: new = old + 6
+        Test: divisible by 19
+          If true: throw to monkey 2
+          If false: throw to monkey 0
+      */
+      val monkey1 = Monkey("1", mutable.ListBuffer("54", "65", "75", "74"), x => {
+        try
+          val result = java.lang.Math.addExact(java.lang.Long.valueOf(x), 6L)
+          if result % 19 == 0 then ("2", String.valueOf(result)) else ("0", String.valueOf(result))
+        catch
+          case _: ArithmeticException =>
+            val result = BigInt(x) + six
+            if result.mod(nineteen).compareTo(zero) != 0 then ("2", result.toString()) else ("0", result.toString())
+          case _: NumberFormatException =>
+            val result = BigInt(x) + six
+            if result.mod(nineteen).compareTo(zero) != 0 then ("2", result.toString()) else ("0", result.toString())
+      }, 0)
+
+      /*
+      Monkey 2:
+        Starting items: 79, 60, 97
+        Operation: new = old * old
+        Test: divisible by 13
+          If true: throw to monkey 1
+          If false: throw to monkey 3
+      */
+      val monkey2 = Monkey("2", mutable.ListBuffer("79", "60", "97"), x => {
+        try
+          val result = java.lang.Math.multiplyExact(java.lang.Long.valueOf(x), java.lang.Long.valueOf(x))
+          if result % 13 == 0 then ("1", String.valueOf(result)) else ("3", String.valueOf(result))
+        catch
+          case _: ArithmeticException =>
+            val operand = BigInt(x)
+            val result = bigIntMultiply(operand, operand)
+            if result.mod(thirteen).compareTo(zero) != 0 then ("1", result.toString()) else ("3", result.toString())
+          case _: NumberFormatException =>
+            val operand = BigInt(x)
+            val result = bigIntMultiply(operand, operand)
+            if result.mod(thirteen).compareTo(zero) != 0 then ("1", result.toString()) else ("3", result.toString())
+      }, 0)
+
+      /*
+      Monkey 3:
+        Starting items: 74
+        Operation: new = old + 3
+        Test: divisible by 17
+          If true: throw to monkey 0
+          If false: throw to monkey 1
+      */
+      val monkey3 = Monkey("3", mutable.ListBuffer("74"), x => {
+        try
+          val result = java.lang.Math.addExact(java.lang.Long.valueOf(x), 3)
+          if result % 17 == 0 then ("0", String.valueOf(result)) else ("1", String.valueOf(result))
+        catch
+          case _: ArithmeticException =>
+            val result = BigInt(x) + three
+            if result.mod(seventeen).compareTo(zero) != 0 then ("0", result.toString()) else ("1", result.toString())
+          case _: NumberFormatException =>
+            val result = BigInt(x) + three
+            if result.mod(seventeen).compareTo(zero) != 0 then ("0", result.toString()) else ("1", result.toString())
+      }, 0)
+
+
+
+
+
+
+//    val monkey1 = Monkey("1", mutable.ListBuffer("54", "65", "75", "74"), x => {
+//      if isOverflow(x, 6) then
+//        val result = BigInt(x) * six
+//        result.toString()
+//      else String.valueOf(x + 6)
+//    }, x => if x % 19 == 0 then "2" else "0", 0)
+//    val monkey2 = Monkey("2", mutable.ListBuffer("79", "60", "97"), x => {
+//      if isOverflow(x, x) then
+//        val result = BigInt(x) * x
+//        result.toString()
+//      else String.valueOf(x * x)
+//    }, x => if x % 13 == 0 then "1" else "3", 0)
+//    val monkey3 = Monkey("3", mutable.ListBuffer("74"), x => {
+//      if isOverflow(x, 3) then
+//        val result = BigInt(x) * x
+//        result.toString()
+//      else String.valueOf(x + 3)
+//    }, x => if x % 17 == 0 then "0" else "1", 0)
+//
+    val sample = List(monkey0, monkey1, monkey2, monkey3)
+    val monkeys = Day11().part1(sample, 0)
+    monkeys.foreach(monkey => println(monkey.id + " " + monkey.inspections))
+    //BigInt(1).e
+  }
+
+  // Code is in notes for part 1
+//  test("part1") {
+//    val monkey0 = Monkey("0", mutable.ListBuffer(64, 89, 65, 95), x => x * 7, x => if x % 3 == 0 then "4" else "1", 0)
+//    val monkey1 = Monkey("1", mutable.ListBuffer(76, 66, 74, 87, 70, 56, 51, 66), x => x + 5, x => if x % 13 == 0 then "7" else "3", 0)
+//    val monkey2 = Monkey("2", mutable.ListBuffer(91, 60, 63), x => x * x, x => if x % 2 == 0 then "6" else "5", 0)
+//    val monkey3 = Monkey("3", mutable.ListBuffer(92, 61, 79, 97, 79), x => x + 6, x => if x % 11 == 0 then "2" else "6", 0)
+//    val monkey4 = Monkey("4", mutable.ListBuffer(93, 54), x => x * 11, x => if x % 5 == 0 then "1" else "7", 0)
+//    val monkey5 = Monkey("5", mutable.ListBuffer(60, 79, 92, 69, 88, 82, 70), x => x + 8, x => if x % 17 == 0 then "4" else "0", 0)
+//    val monkey6 = Monkey("6", mutable.ListBuffer(64, 57, 73, 89, 55, 53), x => x + 1, x => if x % 19 == 0 then "0" else "5", 0)
+//    val monkey7 = Monkey("7", mutable.ListBuffer(62), x => x + 4, x => if x % 7 == 0 then "3" else "2", 0)
+//
+//    val sample = List(monkey0, monkey1, monkey2, monkey3, monkey4, monkey5, monkey6, monkey7)
+//    val monkeys = Day11().part1(sample, 0)
+//    monkeys.foreach(monkey => println(monkey.id + " " + monkey.inspections))
+//    println(monkeys.map(monkey => monkey.inspections.toLong).product)
+//  }
+
