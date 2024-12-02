@@ -9,6 +9,10 @@ class Day2Test extends munit.FunSuite:
     assertEquals(Day2.part1(InputReader.readInput("src/test/resources/day2/input")), 218)
   }
 
-//  test("sample 1 part 2") {
-//    assertEquals(Day2.part2(InputReader.readInput("src/test/resources/day2/sample")), 4)
-//  }
+  test("sample 1 part 2") {
+    assertEquals(Day2.part2(InputReader.readInput("src/test/resources/day2/sample")), 4)
+  }
+
+  test("part 2") {
+    assertEquals(Day2.part2(InputReader.readInput("src/test/resources/day2/input")), 290)
+  }
