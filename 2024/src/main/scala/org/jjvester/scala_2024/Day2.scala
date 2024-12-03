@@ -24,10 +24,10 @@ private[scala_2024] object Day2:
     else isAscendingSafeReport(report.tail, report.head)
 
   @tailrec
-  private def countSafeReports(reports: List[String], unsafeReports: List[String] = Nil, count: Int = 0): (Int, List[String]) =
+  private def countSafeReportsCachingUnsafeReports(reports: List[String], unsafeReports: List[String] = Nil, count: Int = 0): (Int, List[String]) =
     if reports.isEmpty then (count, unsafeReports)
-    else if isSafe(toReport(reports.head)) then countSafeReports(reports.tail, unsafeReports, count + 1)
-    else countSafeReports(reports.tail, reports.head :: unsafeReports, count)
+    else if isSafe(toReport(reports.head)) then countSafeReportsCachingUnsafeReports(reports.tail, unsafeReports, count + 1)
+    else countSafeReportsCachingUnsafeReports(reports.tail, reports.head :: unsafeReports, count)
 
   @tailrec
   private def strippedForSafety(report: List[Int], idx: Int = 0): Boolean =
@@ -35,8 +35,8 @@ private[scala_2024] object Day2:
     else if isSafe(report.patch(idx, Nil, 1)) then true
     else strippedForSafety(report, idx + 1)
 
-  def part1(input: List[String]): Int = countSafeReports(input)._1
+  def part1(input: List[String]): Int = countSafeReportsCachingUnsafeReports(input)._1
 
   def part2(input: List[String]): Int =
-    val result = countSafeReports(input)
+    val result = countSafeReportsCachingUnsafeReports(input)
     result._1 + result._2.count(report => strippedForSafety(toReport(report)))
