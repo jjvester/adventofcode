@@ -12,18 +12,6 @@ private[scala_2024] object Day6:
       input.head.zipWithIndex.toList.foreach((item, rowIndex) => grid.insert(item.toString, index + rowIndex))
       fillGrid(input.tail, grid, index + grid.x)
 
-  private def draw(grid: Grid[String]): Unit =
-    var index = 0
-
-    for y <- 0 until grid.y do
-      println("")
-      for x <- 0 until grid.x do
-        print(grid.getCell(index).get.item)
-        index += 1
-      end for
-    end for
-  end draw
-
   private def turnRight(cell: Cell[String], currentDirection: Neighbor, grid: Grid[String]): Neighbor =
     currentDirection match
       case NORTH => EAST
@@ -51,12 +39,6 @@ private[scala_2024] object Day6:
     else if isObstacle(next(current, direction, grid)) then patrol(current, turnRight(current, direction, grid), grid, traversed)
     else patrol(next(current, direction, grid), direction, grid, current.index :: traversed)
 
-  @tailrec
-  private def registerRightTurns(current: Cell[String], direction: Neighbor, grid: Grid[String], rightTurns: List[Int] = Nil): List[Int] =
-    if atEnd(current, direction) && !isObstacle(current) then rightTurns
-    else if isObstacle(next(current, direction, grid)) then registerRightTurns(current, turnRight(current, direction, grid), grid, current.index :: rightTurns)
-    else registerRightTurns(next(current, direction, grid), direction, grid, rightTurns)
-
   private def buildGrid(input: List[String]): Grid[String] =
     val y = input.size
     val x = input.head.length
@@ -68,22 +50,38 @@ private[scala_2024] object Day6:
     val grid = buildGrid(input)
     val guard = findGuard(grid)
 
-    draw(grid)
     val patrolPath = patrol(guard, currentDirection(guard.item), grid)
     patrolPath.distinct.size
 
+  private def isCycle(current: Cell[String], direction: Neighbor, visited: Map[Int, Set[Neighbor]]): Boolean =
+    if visited.contains(current.index) then
+      val directionsTraversed = visited(current.index)
+      directionsTraversed.contains(direction)
+    else false
+
+  private def updateVisits(current: Cell[String], direction: Neighbor, visited: Map[Int, Set[Neighbor]]): Map[Int, Set[Neighbor]] =
+    visited.updatedWith(current.index)(visits => Option(visits.getOrElse(Set.empty) + direction))
+
+  @tailrec
+  private def patrolRecordingVisits(current: Cell[String], direction: Neighbor, grid: Grid[String], visited: Map[Int, Set[Neighbor]] = Map.empty): Boolean =
+    if atEnd(current, direction) && !isObstacle(current) then true
+    else if isCycle(current, direction, visited) then false
+    else if isObstacle(next(current, direction, grid)) then patrolRecordingVisits(current, turnRight(current, direction, grid), grid, updateVisits(current, direction, visited))
+    else patrolRecordingVisits(next(current, direction, grid), direction, grid, updateVisits(current, direction, visited))
+
   def part2(input: List[String]): Int =
     val grid = buildGrid(input)
-    val guard = findGuard(grid)
-    val rightTurns = registerRightTurns(guard, currentDirection(guard.item), grid)
+    val startLocation = findGuard(grid)
+    val patrolPath = patrol(startLocation, currentDirection(startLocation.item), grid).distinct
 
-    var index = 0
-    for y <- 0 until grid.y do
-      println("")
-      for x <- 0 until grid.x do
+    var candidates: Set[Int] = Set.empty
+    patrolPath.foreach{ index =>
 
-        if rightTurns.contains(index) then print("R") else print(grid.getCell(index).get.item)
-        index += 1
-      end for
-    end for
-    0
+      if index != startLocation.index then
+        grid.insert("#", index)
+        if !patrolRecordingVisits(startLocation, currentDirection(startLocation.item), grid) then
+          candidates = candidates + index
+
+        grid.insert(".", index)
+    }
+    candidates.size
