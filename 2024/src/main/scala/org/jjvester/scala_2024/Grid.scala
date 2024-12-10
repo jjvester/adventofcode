@@ -25,6 +25,17 @@ private[scala_2024] class Grid[T](val x: Int, val y: Int):
 
   def getCell(index: Int): Option[Cell[T]] = items.get(index)
 
+  def draw(): Unit =
+    var index = 0
+    for y <- 0 until y do
+      println("")
+      for x <- 0 until x do
+        print(items(index).item)
+        index += 1
+      end for
+    end for
+  end draw
+
   private def isTopRow(index: Int) = index >= 0 && index < x
   private def isBottomRow(index: Int) = index >= (x * y - x) && index < (x * y - 1)
   private def isLeft(index: Int) = index % x == 0
