@@ -7,12 +7,17 @@ class Day9Test extends munit.FunSuite:
   override val munitTimeout: FiniteDuration = Duration(300, "s")
 
   test("sample 1 part 1") {
-    assertEquals(new Day9().part1(InputReader.readInput("src/test/resources/day9/sample")), 1928)
+    assertEquals(new Day9().part1(InputReader.readInput("src/test/resources/day9/sample")), 1928L)
+  }
+  
+  test("part 1") {
+    assertEquals(new Day9().part1(InputReader.readInput("src/test/resources/day9/input")), 6307275788409L)
   }
 
-  // 768893376
-  // 768893376
-  // 768893376
-//  test("part 1") {
-//    assertEquals(new Day9().part1(InputReader.readInput("src/test/resources/day9/input")), 1928)
-//  }
+  test("sample 1 part 2") {
+    assertEquals(new Day9().part2(InputReader.readInput("src/test/resources/day9/sample")), 2858L)
+  }
+
+  test("part 2") {
+    assertEquals(new Day9().part2(InputReader.readInput("src/test/resources/day9/input")), 6307275788409L)
+  }
